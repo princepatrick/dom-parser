@@ -22,6 +22,8 @@ public class DomParserController {
             @RequestParam(value = "attribute", required = false, defaultValue = "None") String attribueListFilter,
             @RequestParam(value = "returnAttribute", required = false, defaultValue = "None") String returnAttribute ){
 
+        System.out.println("Entered the parseDom method in DomParserController ");
+
         List<ParserResponse> responseDom = new ArrayList<>();
 
         responseDom = domParserService.parseDomTree( requestBody, elementFilter, attribueListFilter, returnAttribute );
