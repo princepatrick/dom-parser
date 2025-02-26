@@ -28,18 +28,25 @@ public class CommonExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public List<ParserResponse> handleException(Exception ex ){
-        System.out.println("Entering into the handleException() block ");
+    public ResponseEntity<List<ParserResponse>> handleException(Exception ex) {
+        System.out.println("Entering into the handleException() block");
 
         List<ParserResponse> response = new ArrayList<>();
 
         ParserResponse parserResponse = new ParserResponse();
         parserResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-        parserResponse.setParsedResponse("An Exception has occurred " + ex.getMessage());
+        parserResponse.setParsedResponse("An Exception has occurred: " + ex.getMessage());
 
-        System.out.println("An Exception has occurred " + ex.getMessage());
+        // Add the parserResponse to the list so that it is returned
+        response.add(parserResponse);
 
-        return response;
+        System.out.println("An Exception has occurred: " + ex.getMessage());
+
+        // Return a ResponseEntity with the error list and appropriate status
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(response);
     }
+
 
 }
