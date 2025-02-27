@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,11 +38,13 @@ public class DomParserController {
     DomParserService domParserService;
 
     @PostMapping("get-value/")
-    public List<ParserResponse> parseDom(
+    public ResponseEntity<String> parseDom(
             @RequestBody() String requestBody,
             @RequestParam(value = "element", required = false, defaultValue = "None") String elementFilter,
             @RequestParam(value = "attribute", required = false, defaultValue = "None") String attribueListFilter,
             @RequestParam(value = "returnAttribute", required = false, defaultValue = "None") String returnAttribute ){
+
+        System.out.println("Entering into parseDom() method");
 
         System.out.println("Entered the parseDom() method in DomParserController ");
 
@@ -49,7 +52,7 @@ public class DomParserController {
 
         responseDom = domParserService.parseDomTree( requestBody, elementFilter, attribueListFilter, returnAttribute );
 
-        return responseDom;
+        return ResponseEntity.ok("Successful Call");
     }
 
     @PostMapping("authenticate/")
@@ -57,11 +60,14 @@ public class DomParserController {
 
         System.out.println("We have entered into the createAuthenticationToken()");
 
+        String userName = authenticationRequest.getUsername();
+        String password = authenticationRequest.getPassword();
+
+        System.out.println("The username is " + userName +" and passsword is " + password );
+
         try{
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            authenticationRequest.getUsername(),
-                            authenticationRequest.getPassword()));
+                    new UsernamePasswordAuthenticationToken( userName, password ));
         } catch ( BadCredentialsException ex ){
 //            throw new Exception("Incorrect user name or password");
 //            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
