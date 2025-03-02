@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -12,6 +13,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import com.example.domparser.filter.JwtRequestFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+//import org.springframework.security.config.annotation.web.configurers.oauth2.OAuth2LoginConfigurer;
+
 
 
 @Configuration
@@ -28,12 +31,13 @@ public class SecurityConfig {
         System.out.println("The http request has reached filterChain() method");
 
         http.csrf(csrf -> csrf.disable())
-                .sessionManagement( sesssion -> sesssion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement( sesssion -> sesssion.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeHttpRequests(auth ->
                     auth.requestMatchers("/dom-parser/authenticate/**").permitAll().
                             anyRequest().authenticated()
-            )
-            .httpBasic();
+            ).oauth2Login(Customizer.withDefaults());
+
+//            .httpBasic();
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         System.out.println("The http request has left the filterChain() method");
