@@ -1,5 +1,7 @@
 package com.example.domparser.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @Component
 public class JwtUtil {
 
+    private static Logger logger = LoggerFactory.getLogger(JwtUtil.class);
+
     @Value("${jwt.secret}")
     private String secret;
 
@@ -22,6 +26,8 @@ public class JwtUtil {
     private Long expiration;
 
     public String generateToken(UserDetails userDetails ){
+        logger.info("The tokens are being generated!");
+
         Map<String, Object> claims = new HashMap<>();
 
         return Jwts.builder()
@@ -34,6 +40,8 @@ public class JwtUtil {
     }
 
     public String extractUsername( String token ){
+        logger.info("The username is extracted using extractUsername() at JwtUtil");
+
         return Jwts.parser()
                 .setSigningKey(secret)
                 .parseClaimsJws(token)
@@ -42,11 +50,13 @@ public class JwtUtil {
     }
 
     public boolean validateToken(String token, UserDetails userDetails){
+        logger.info("The tokens are being validated using validateToken() at JwtUtil");
         final String username = extractUsername( token );
         return (username.equals(userDetails.getUsername())) && !isTokenExpired( token );
     }
 
     private boolean isTokenExpired( String token ){
+        logger.info("The tokens are checked for expiry using isTokenExpired() at JwtUtil");
         Date expirationDate = Jwts.parser()
                 .setSigningKey(secret)
                 .parseClaimsJws(token)

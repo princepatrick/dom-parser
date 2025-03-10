@@ -1,6 +1,8 @@
 package com.example.domparser.security;
 
 import com.example.domparser.service.CustomUserDetailsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +21,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 public class SecurityConfig {
+    
+    private static Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Autowired
     JwtRequestFilter jwtRequestFilter;
@@ -28,7 +32,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        System.out.println("The http request has reached filterChain() method");
+        logger.debug("The http request has reached filterChain() method in SecurityConfig");
 
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement( sesssion -> sesssion.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
@@ -40,7 +44,7 @@ public class SecurityConfig {
 //            .httpBasic();
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
-        System.out.println("The http request has left the filterChain() method");
+        logger.debug("The http request has left the filterChain() method in SecurityConfig");
 
         return http.build();
 
@@ -48,7 +52,7 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        System.out.println("We have reached the webSecurityCustomizer() method");
+        logger.debug("We have reached the webSecurityCustomizer() method in SecurityConfig");
 
         return (web) -> web.ignoring().requestMatchers("/resources/**");
     }

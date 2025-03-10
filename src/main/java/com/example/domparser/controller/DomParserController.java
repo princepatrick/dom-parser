@@ -16,15 +16,17 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController()
 @RequestMapping("/dom-parser/")
 public class DomParserController {
 
+    private static final Logger logger = LoggerFactory.getLogger(DomParserController.class);
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -44,9 +46,9 @@ public class DomParserController {
             @RequestParam(value = "attribute", required = false, defaultValue = "None") String attribueListFilter,
             @RequestParam(value = "returnAttribute", required = false, defaultValue = "None") String returnAttribute ){
 
-        System.out.println("Entering into parseDom() method");
-
-        System.out.println("Entered the parseDom() method in DomParserController ");
+        logger.debug("Entering into parseDom() method");
+        
+        logger.debug("Entered the parseDom() method in DomParserController");
 
         List<ParserResponse> responseDom = new ArrayList<>();
 
@@ -58,21 +60,22 @@ public class DomParserController {
     @PostMapping("authenticate/")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest ) throws Exception{
 
-        System.out.println("We have entered into the createAuthenticationToken()");
+        logger.debug("We have entered into the createAuthenticationToken()");
 
         String userName = authenticationRequest.getUsername();
         String password = authenticationRequest.getPassword();
 
-        System.out.println("The username is " + userName +" and passsword is " + password );
+        logger.debug("The username is " + userName +" and passsword is " + password );
 
         try{
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken( userName, password ));
+            logger.info("The authentication is successful in DomParserController class");
         } catch ( BadCredentialsException ex ){
 //            throw new Exception("Incorrect user name or password");
 //            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 //                    .body("Incorrect username or password");
-           System.out.println("Throwing an exception for in DomParserController class " + ex.getMessage() );
+           logger.error("Throwing an exception for in DomParserController class " + ex.getMessage() );
 
            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -81,10 +84,13 @@ public class DomParserController {
 
         }
 
-        System.out.println("We have exited from the createAuthenticationToken() and userDetails are set");
+        logger.debug("We have exited from the createAuthenticationToken() and userDetails are set");
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
         final String jwt = jwtUtil.generateToken(userDetails);
+
+        logger.debug("The JWT token is generated at DomParserController class");
+
         return ResponseEntity.ok( new AuthenticationResponse(jwt));
     }
 

@@ -1,6 +1,11 @@
 package com.example.domparser.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class AuthenticationRequest {
+
+    private static Logger logger = LoggerFactory.getLogger(AuthenticationRequest.class);
 
     private String username;
 
@@ -11,7 +16,7 @@ public class AuthenticationRequest {
     }
 
     public AuthenticationRequest( String username, String password ){
-        System.out.println("We are initializing the AuthenticationRequest()");
+        logger.debug("We are initializing the AuthenticationRequest()");
         this.username = username;
         this.password = password;
     }
