@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 
+import javax.print.Doc;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
@@ -109,6 +110,11 @@ public class DomParserService {
                     } else {
                         parserResponse.setParsedResponse(element.getAttribute(returnAttribute));
                     }
+
+                    Map<String, String> attributes = domParserServiceImpl.getAttributes(root);
+                    parserResponse.setAttributes(attributes);
+
+                    response.add(parserResponse);
                 }
             }
         } catch( Exception e ){
@@ -149,8 +155,43 @@ public class DomParserService {
 
         List<ParserResponse> response = new ArrayList<>();
 
-        return response;
+        try{
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new InputSource(new StringReader(requestBody)));
+            document.getDocumentElement().normalize();
 
+            NodeList nodeList = document.getElementsByTagName(elementFilter);
+
+            for( int i=0 ; i<nodeList.getLength() ; i++ ){
+                Node node = nodeList.item(i);
+
+                if( node.getNodeType() == Node.ELEMENT_NODE ){
+                    Element element = (Element) node;
+                    ParserResponse parserResponse = new ParserResponse();
+
+                    if(returnAttribute.equals("INNER_TEXT")){
+                        parserResponse.setParsedResponse(element.getTextContent());
+                    } else if(returnAttribute.equals("INNER_HTML")){
+                        parserResponse.setParsedResponse(domParserServiceImpl.getInnerHtml(element));
+                    } else if(returnAttribute.equals("OUTER_HTML")){
+                        parserResponse.setParsedResponse(domParserServiceImpl.getOuterHtml(element));
+                    } else {
+                        parserResponse.setParsedResponse(element.getAttribute(returnAttribute));
+                    }
+
+                    Map<String, String> attributeList = domParserServiceImpl.getAttributes(element);
+                    parserResponse.setAttributes(attributeList);
+
+                    response.add(parserResponse);
+                }
+            }
+        } catch (Exception e){
+            logger.error("Errors occuring at parseDomTreeWithAttrList() with the exception " + e.getMessage());
+            throw new DomParserException("We are facing the DomParserException while parsing the data " + e.getMessage());
+        }
+
+        return response;
     }
 
     private void findElementByAttributes( List<String> attributeList, Element root, List<ParserResponse> response, String returnAttribute ){
