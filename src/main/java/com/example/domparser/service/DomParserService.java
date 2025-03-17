@@ -7,12 +7,10 @@ import com.example.domparser.util.DomParserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
+import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -21,6 +19,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Service()
 @Component()
@@ -122,13 +121,23 @@ public class DomParserService {
 
     public List<ParserResponse> parseDomTreeWithAttrList( String requestBody,
                                                                     String attributeListFilter, String returnAttribute  ){
-
         List<ParserResponse> response = new ArrayList<>();
 
         try{
+            logger.info("The dom tree is parsed with the attribute list");
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new InputSource(new StringReader(requestBody)));
+            document.getDocumentElement().normalize();
+
+            List<String> attributeList = Arrays.asList(attributeListFilter.split(","));
+            Element root = document.getDocumentElement();
+
+            findElementByAttributes( attributeList, root, response, returnAttribute );
 
         } catch (Exception e){
-
+            logger.error("Errors occuring at parseDomTreeWithAttrList() with the exception " + e.getMessage());
+            throw new DomParserException("We are facing the DomParserException while parsing the data " + e.getMessage());
         }
 
         return response;
@@ -142,5 +151,56 @@ public class DomParserService {
 
         return response;
 
+    }
+
+    private void findElementByAttributes( List<String> attributeList, Element root, List<ParserResponse> response, String returnAttribute ){
+
+        boolean matchesAllAttributes = true;
+
+        for(String attribute : attributeList){
+            String[] attributePair = attribute.split("=");
+
+            if( attributePair.length != 2 ) {
+                matchesAllAttributes = false;
+                break;
+            }
+
+            String attributeKey = attributePair[0];
+            String attributeVal = attributePair[1];
+
+            if( !root.hasAttribute(attributeKey) || !root.getAttribute(attributeKey).equals(attributeVal) ){
+                matchesAllAttributes = false;
+                break;
+            }
+        }
+
+        if( matchesAllAttributes ){
+            ParserResponse parserResponse = new ParserResponse();
+
+            if( returnAttribute.equals("INNER_TEXT") ){
+                parserResponse.setParsedResponse(root.getTextContent());
+            } else if( returnAttribute.equals("INNER_HTML") ){
+                parserResponse.setParsedResponse(domParserServiceImpl.getInnerHtml(root));
+            } else if( returnAttribute.equals("OUTER_HTML") ) {
+                parserResponse.setParsedResponse(domParserServiceImpl.getOuterHtml(root));
+            } else {
+                parserResponse.setParsedResponse(root.getAttribute(returnAttribute));
+            }
+
+            Map<String, String> attributes = domParserServiceImpl.getAttributes(root);
+            parserResponse.setAttributes(attributes);
+
+            response.add(parserResponse);
+        }
+
+        NodeList childNodes = root.getChildNodes();
+
+        for( int i=0 ; i<childNodes.getLength() ; i++ ){
+            Node node = childNodes.item(i);
+
+            if( node.getNodeType() == Node.ELEMENT_NODE ){
+                findElementByAttributes(attributeList, (Element) node, response, returnAttribute);
+            }
+        }
     }
 }

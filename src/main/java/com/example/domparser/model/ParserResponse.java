@@ -2,6 +2,8 @@ package com.example.domparser.model;
 
 import org.springframework.http.HttpStatus;
 
+import java.util.Map;
+
 public class ParserResponse {
 
     private HttpStatus status;
@@ -21,5 +23,9 @@ public class ParserResponse {
 
     public void setParsedResponse(String parsedResponse) {
         this.parsedResponse = parsedResponse;
+    }
+
+    public void setAttributes(Map<String, String> map){
+
     }
 }
