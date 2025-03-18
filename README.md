@@ -1,4 +1,4 @@
-# dom-parser
+## dom-parser
 A simple implementation of a dom parser.
 
 A DOM parser is a tool that takes up the HTML or XML as the input and converts into tree like objects that make it faster to access and manipulate.
@@ -10,7 +10,10 @@ Dom Parsers are used in various use case:
 - Testing Frameworks: Testing tools like Selenium and Puppeteer use dom parsing to interact with the web pages for automated testing
 - XML Processing applications: Applications that parses, and beautifies XML files uses a similar implementation of the DOM Parser.
 
-In our implementation, we will be working on a dom parser implementation that parses through the HTML files.
+A simple architecture of our implementation can be found in 
+![Architecture Diagram](dom-parser-architecture.png)
+
+In our implementation, we will be working on a dom parser implementation that parses through both XML and HTML files.
 
 Technologies Used:
 The motive of the project is to get in use with the Spring Boot (multiple authentications, logger) and some integrations to process the logs and metrics. 
