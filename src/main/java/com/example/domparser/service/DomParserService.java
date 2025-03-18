@@ -99,6 +99,8 @@ public class DomParserService {
 
                     if( !matchesAllAtributes ) continue;
 
+                    logger.info("Matches All Attribute for the element with the returnAttribute: {}", returnAttribute);
+
                     ParserResponse parserResponse = new ParserResponse();
 
                     if( returnAttribute.equals("INNER_TEXT")){
@@ -111,7 +113,7 @@ public class DomParserService {
                         parserResponse.setParsedResponse(element.getAttribute(returnAttribute));
                     }
 
-                    Map<String, String> attributes = domParserServiceImpl.getAttributes(root);
+                    Map<String, String> attributes = domParserServiceImpl.getAttributes(element);
                     parserResponse.setAttributes(attributes);
 
                     response.add(parserResponse);
@@ -170,6 +172,8 @@ public class DomParserService {
                     Element element = (Element) node;
                     ParserResponse parserResponse = new ParserResponse();
 
+                    logger.info("Matches All Attribute for the element with the returnAttribute: {}", returnAttribute);
+
                     if(returnAttribute.equals("INNER_TEXT")){
                         parserResponse.setParsedResponse(element.getTextContent());
                     } else if(returnAttribute.equals("INNER_HTML")){
@@ -195,7 +199,6 @@ public class DomParserService {
     }
 
     private void findElementByAttributes( List<String> attributeList, Element root, List<ParserResponse> response, String returnAttribute ){
-
         boolean matchesAllAttributes = true;
 
         for(String attribute : attributeList){
@@ -216,6 +219,8 @@ public class DomParserService {
         }
 
         if( matchesAllAttributes ){
+            logger.info("Matches All Attribute for the element with the returnAttribute: {}", returnAttribute);
+
             ParserResponse parserResponse = new ParserResponse();
 
             if( returnAttribute.equals("INNER_TEXT") ){
@@ -234,7 +239,7 @@ public class DomParserService {
             response.add(parserResponse);
         }
 
-        NodeList childNodes = root.getChildNodes();
+        NodeList childNodes = domParserServiceImpl.getChildElements(root);
 
         for( int i=0 ; i<childNodes.getLength() ; i++ ){
             Node node = childNodes.item(i);
